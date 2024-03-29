@@ -1,7 +1,7 @@
 import requests
 
 
-def wolfram_alpha_query(query, app_id):
+def getAnswer(query):
     # Wolfram Alpha API endpoint
     # url = "http://api.wolframalpha.com/v1/result"
     url = "http://api.wolframalpha.com/v1/spoken"
@@ -19,25 +19,23 @@ def wolfram_alpha_query(query, app_id):
     if response.status_code == 200:
         return response.text
     else:
-        print("Error making API call:", response.text)
-        return None
+        print("Error making API call: ", response.text)
+        return "Please reformulate your question."
 
 
-# Example query
-query = "how do i cook pasta?"
+def main():
+    # Example questions
+    questions = [
+        "what is spaghetti",
+        "what is the weather in Ottawa",
+        "random question"
+    ]
 
-# Replace 'YOUR_APP_ID' with your actual Wolfram Alpha app ID
-app_id = "QG759U-K96T398GRW"
+    # Get answers for each question
+    for question in questions:
+        answer = getAnswer(question)
+        print(f"Question: {question}\nAnswer: {answer}\n")
 
-# Make the API call and get the response content
-response = wolfram_alpha_query(query, app_id)
 
-
-print(response)
-# # Save or display the response content as needed
-# if response_content:
-#     with open("wolfram_alpha_response.png", "wb") as f:
-#         f.write(response_content)
-#     print("Response saved as 'wolfram_alpha_response.png'.")
-# else:
-#     print("No response received.")
+if __name__ == "__main__":
+    main()

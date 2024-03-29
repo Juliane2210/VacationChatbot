@@ -1,13 +1,12 @@
 from flask import Flask, render_template, request
 from flask_cors import CORS
 import QAVacationService
+import WolframAlphaService
 from IntentService import getIntent
-import requests
+import json
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-
-# Create endpoint to host PyChat HTML page
 
 
 @app.route('/')
@@ -17,43 +16,20 @@ def index():
 # Create endpoint to cater input query of Exploria
 
 
-def isGreetingIntent(intent):
-    if (intent[0] == "greeting"):
+def isGreetingIntent(intent_classification):
+    if (intent_classification == "greeting"):
         return True
     return False
 
 
-def isLifestyleIntent(intent):
-
+def isLifestyleIntent(intent_classification):
     #
     # Make a list of all the intents that match to lifestyle
     # Travel, Movie, Cooking
     #
-    if (intent[0] == "cook_time"):
+    if (intent_classification == "cook_time"):
         return True
     return False
-
-
-def wolfram_alpha_query(query):
-    # Wolfram Alpha API endpoint
-    # url = "http://api.wolframalpha.com/v1/result"
-    url = "http://api.wolframalpha.com/v1/spoken"
-
-    # Parameters for the query
-    params = {
-        "appid": "QG759U-K96T398GRW",
-        "i": query
-    }
-
-    # Make the API call
-    response = requests.get(url, params=params)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        return response.text
-    else:
-        print("Error making API call: ", response.text)
-        return "Please reformulate your question."
 
 
 @app.route('/submit', methods=["GET", "POST"])
@@ -64,31 +40,34 @@ def processInputQuery():
         utterance = req["msg"]
 
         #
-        # The intent service could be remotely hosted
+        # The intent service could be remotely hosted and returns the intent classification with a confidence score.
         #
-        intent = getIntent(utterance)
+        intent_json = json.loads(getIntent(utterance))
+        intent_classification = intent_json["intent"]
+        confidence_score = intent_json["confidence"]
 
-        intentText = intent[0]
+        if (confidence_score < 20):
+            return "I didn't understand, please rephrase your question."
 
-        response = " out of scope buddy bot "
-        if (isLifestyleIntent(intent)):
-
-            response = QAVacationService.getAnswer(req["msg"])
-
-            response = "I think you are asking about " + intentText + ". " + response
-        elif (isGreetingIntent(intent)):
+        response = f"I am {confidence_score} confident you asked about {intent_classification} "
+        if (isLifestyleIntent(intent_classification)):
             #
-            # Go to a weather API
+            # Specialized responses for custom category
             #
-            response = " Hello this is Exploria.  Ask me any question."
+            answer = QAVacationService.getAnswer(utterance)
+            response = response + ".  " + answer
+
+        elif (isGreetingIntent(intent_classification)):
+            #
+            # Custom Greeting
+            #
+            response = "Hello this is Exploria.  Ask me any question."
         else:
-
             #
-            # General knowledge query will go to wikidata
+            # General knowledge query will go to WolframAlpha
             #
-            response = wolfram_alpha_query(utterance)
-
-            response = "I think you are asking about " + intentText + ". " + response
+            answer = WolframAlphaService.getAnswer(utterance)
+            response = response + ".  " + answer
 
         return response
     else:
