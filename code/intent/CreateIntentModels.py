@@ -13,23 +13,26 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
-from imblearn.under_sampling import RandomUnderSampler
+
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 from sklearn.metrics import recall_score, precision_score, make_scorer
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from imblearn.ensemble import BalancedRandomForestClassifier, EasyEnsembleClassifier, RUSBoostClassifier
+# from imblearn.ensemble import BalancedRandomForestClassifier, EasyEnsembleClassifier, RUSBoostClassifier
 
 import pickle
 
 
 """# Load and clean data"""
 
+# Define paths for saving models and vectorizer.
 OUTPUT_SDG_MODEL_PATH = ".//code//intent//models//SGD_model_inscope.pkl"
 OUTPUT_COUNTVECT_PATH = ".//code//intent//models//Count_vector_inscope.pkl"
 OUTPUT_LABELENCODER_PATH = ".//code//intent//models//LabelEncoder_inscope.pkl"
 
 
+
+# Load intent classification datasets from JSON files.
 train = pd.read_json('.//code//intent//intent_data//is_train.json')
 val = pd.read_json('.//code//intent//intent_data//is_val.json')
 test = pd.read_json('.//code//intent//intent_data//is_test.json')
@@ -38,6 +41,8 @@ oos_train = pd.read_json(
 oos_val = pd.read_json('.//code//intent//intent_data//oos_val.json')
 oos_test = pd.read_json(
     './/code//intent//intent_data//oos_test.json')
+
+# Standardize column names across datasets and print dataset information.
 files = [(train, 'train'), (val, 'val'), (test, 'test'), (oos_train,
                                                           'oos_train'), (oos_val, 'oos_val'), (oos_test, 'oos_test')]
 for file, name in files:
@@ -54,7 +59,7 @@ in_train = train.copy()
 
 """# In-scope prediction"""
 
-
+# Define functions for preprocessing text data.
 def binarize(df):
     df.intent = np.where(df.intent != 'oos', 0, 1)
     return df
@@ -98,7 +103,7 @@ def get_score(clf, binary=0):
     elif binary == 0:
         return clf, clf.score(X_val, y_val), clf.score(X_test, y_test)
 
-
+# Preprocess training data.
 X_train, y_train, cv, le = preprocess(in_train)
 
 
@@ -110,6 +115,8 @@ with open(OUTPUT_COUNTVECT_PATH, 'wb') as f:
 with open(OUTPUT_LABELENCODER_PATH, 'wb') as f:
     pickle.dump(le, f)
 
+
+# Process validation and test data using the trained CountVectorizer and LabelEncoder.
 X_val, y_val = process_non_train(val, cv, le)
 X_test, y_test = process_non_train(test, cv, le)
 
