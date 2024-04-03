@@ -1,15 +1,24 @@
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from IntentService import getIntent
 import json
-# Services for request fulfilmment could be hosted remotely
+
+# Intent service could be hosted remotely but for this project is hosted locally
+from IntentService import getIntent
+
+# The question resolution service could be hosted remotely or locally.
+
+# QAVacationService is local
 import QAVacationService
+
+# WolframAlpha is an example of remote access
 import WolframAlphaService
 
 
 # Initializing Flask
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes (server accessible from any domain)
+
+# Required for html page to interact with other sites
+CORS(app)  # Enable CORS for all routes
 
 
 # Defining a route for the root URL '/'
@@ -17,6 +26,8 @@ CORS(app)  # Enable CORS for all routes (server accessible from any domain)
 # When the route URL is accessed, render and return the 'index.html' template
 def index():
     return render_template('index.html')
+
+# Create endpoint to cater input query of Exploria
 
 
 # Helper function to determine if the intent classification is a greeting
@@ -31,14 +42,16 @@ def isGreetingIntent(intent_classification):
 def isLifestyleIntent(intent_classification):
     #
     # Make a list of all the intents that match to lifestyle
-    # Travel, Movie, Cooking (doqa dataset)
+    # Travel, Movie, Cooking
     #
-    if (intent_classification == "cook_time"):
-        return True
-    return False
+    allowed_classifications = ["cook_time", "travel_alert",
+                               "travel_suggestion", "travel_notification", "international_visa", "movie"]
 
+    return intent_classification in allowed_classifications
 
 # Defining a route for '/submit', accepting both GET and POST methods
+
+
 @app.route('/submit', methods=["GET", "POST"])
 def processInputQuery():
     # getting  JSON data from the request
@@ -58,10 +71,9 @@ def processInputQuery():
         # dissambiguation prompt for when the intent detection confidence score is below 20
         if (confidence_score < 20):
             return "I didn't understand, please rephrase your question."
-
-        # First sentence of response for any utterance with intent confident over 20.
+# First sentence of response for any utterance with intent confident over 20.
         # gives the confidence score and the intent
-        response = f"I am {confidence_score} percent confident you asked about {intent_classification} "
+        response = f"I am {confidence_score} percent confident you asked about '{intent_classification}'"
         # Custom Aswers to append to response
         if (isLifestyleIntent(intent_classification)):
             #

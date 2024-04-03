@@ -19,21 +19,31 @@
     />
     <style>
       body {
-        margin: 0 auto;
-        font-family: Arial, Helvetica, sans-serif;
-        background-color: #f380a178;
+        font-family: Calibri, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 5vw; /* Use viewport width for padding */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* Full height of the viewport */
       }
+      .chatbot-container {
+        width: 80vw; /* 80% of the viewport width */
 
-      .header {
+        background-color: white;
+        border-radius: 20px;
         overflow: hidden;
-        background-color: #f1f1f1;
-        padding: 20px 10px;
-        border-bottom: 1px solid;
-        padding: 10px;
-        box-shadow: 5px 10px 8px 10px #888888;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
 
       .header a {
+        background-color: #00b0f0;
+        color: white;
+        text-align: center;
+        padding: 1vw;
+        font-size: 4vw; /* Responsive font size */
+
         float: left;
         color: black;
         text-align: center;
@@ -73,6 +83,55 @@
         .header-right {
           float: none;
         }
+      }
+
+      /* Add circular text bubble style to the container class */
+      .display-messages .container {
+        position: relative; /* Needed for positioning the tail */
+        border: 2px solid blue; /* Blue outline */
+        border-radius: 20px; /* Makes it appear as a circular text bubble */
+        max-width: 70%; /* Adjust the width as needed */
+        background-color: #f1f1f1;
+        padding: 10px;
+        margin: 10px;
+      }
+
+      /* Create a tail for the container */
+      .display-messages .container::before {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 10px 10px 0;
+        border-color: #d3d2d2 transparent transparent;
+        bottom: -10px;
+        left: 10%;
+        transform: translateX(-50%);
+      }
+
+      /* Adjust darker style for the bot's messages */
+      .display-messages .container.darker {
+        align-self: end;
+
+        order-color: #97d4ea;
+        background-color: #74c6e3bf;
+      }
+
+      /* Adjust the tail for the darker style */
+      .display-messages .container.darker::before {
+        border-color: #ddd transparent transparent;
+        left: 90%;
+      }
+
+      /* Add circular text bubble style to the container class */
+      .display-messages .container {
+        border: 2px solid #d3d2d2;
+        border-radius: 20px;
+        max-width: 70%;
+        background-color: #f1f1f1;
+        padding: 10px;
+        margin: 10px;
       }
 
       .container {
@@ -120,13 +179,20 @@
 
       /* Add styles to the form container */
       .form-container {
+        background-color: #00b0f0;
+        color: white;
+        text-align: center;
+        padding: 1vw;
+        font-size: 4vw; /* Responsive font size */
+
         padding: 10px;
-        background-color: white;
       }
 
       /* Full-width textarea */
       .form-container textarea {
-        width: calc(100% - 40px);
+        flex: 1;
+        margin-right: 10px;
+
         padding: 15px;
         margin: 5px 5px 5px 5px;
         border: none;
@@ -145,14 +211,11 @@
 
       /* Set a style for the submit/send button */
       .form-container .btn {
-        background-color: #04aa6d;
-        color: white;
+        background-color: #dd89b9;
+        border-radius: 5px;
         padding: 16px 20px;
-        border: none;
+        box-shadow: 7px 5px 7px 0px rgb(10 3 3 / 33%);
         cursor: pointer;
-        width: 100%;
-        margin-bottom: 10px;
-        opacity: 0.8;
       }
 
       /* Add some hover effects to buttons */
@@ -162,12 +225,19 @@
       }
 
       .display-messages {
+        display: flex;
+        justify-content: flex-end;
         overflow: auto;
-        height: 700px;
+
+        flex-direction: column-reverse;
+        align-items: stretch;
       }
 
       .buttonIn {
         position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
       }
 
       .mic {
@@ -190,7 +260,8 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        margin: 10px;
+
+        background-color: #00b0f0;
       }
 
       .clear-chat-btn {
@@ -357,36 +428,38 @@
   </head>
 
   <body>
-    <div class="header">
-      <a href="#default" class="logo">Exploria </a>
+    <div class="chatbot-container">
+      <div class="header">
+        <a href="#default" class="logo">Exploria </a>
 
-      <!-- Microphone and Clear Chat buttons -->
-      <div class="mic-clear-container">
-        <button class="mic" onclick="startSpeechRecognition()">
-          <i class="fa fa-solid fa-microphone fa-xl"></i>
-        </button>
-        <button class="clear-chat-btn" onclick="location.reload()">
-          Clear Chat
-        </button>
+        <!-- Microphone and Clear Chat buttons -->
+        <div class="mic-clear-container">
+          <button class="mic" onclick="startSpeechRecognition()">
+            <i class="fa fa-solid fa-microphone fa-xl"></i>
+          </button>
+          <button class="clear-chat-btn" onclick="location.reload()">
+            Clear Chat
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Input field and submit button -->
-    <div class="form-container">
-      <div class="buttonIn">
-        <textarea
-          placeholder="Key-in Input..."
-          name="input-query"
-          id="input-query"
-          required
-        ></textarea>
-        <button type="submit" class="btn" onclick="submitMessage()">
-          Send
-        </button>
+      <!-- Input field and submit button -->
+      <div class="form-container">
+        <div class="buttonIn">
+          <textarea
+            placeholder="Key-in Input..."
+            name="input-query"
+            id="input-query"
+            required
+          ></textarea>
+          <button type="submit" class="btn" onclick="submitMessage()">
+            Send
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Messages display area -->
-    <div class="display-messages" id="messages"></div>
+      <!-- Messages display area -->
+      <div class="display-messages" id="messages"></div>
+    </div>
   </body>
 </html>

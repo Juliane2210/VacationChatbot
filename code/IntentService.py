@@ -4,7 +4,6 @@ import warnings
 import numpy as np
 import json
 
-
 warnings.filterwarnings('ignore')
 
 # Load model into a pickle file under 'models' folder
@@ -26,9 +25,10 @@ def getIntent(utterance):
     # Predict
     result = sgd.predict(X)
 
-    probabilities = sgd.predict_proba(X) #prediction probabilities for all classes
-    confidence_score = max(probabilities[0]) #score is the max probability 
-    confidence_score = round(confidence_score*100) #transform to a percentage
+    # prediction probabilities for all classes
+    probabilities = sgd.predict_proba(X)
+    confidence_score = max(probabilities[0])  # score is the max probability
+    confidence_score = round(confidence_score*100)  # transform to a percentage
 
     # Decode the predicted label (intent) to text instead of numerical value
     result = encoder.inverse_transform(result)
@@ -44,8 +44,7 @@ def getIntent(utterance):
     return result_json
 
 
-
-#to test the code
+# to test the code
 def main():
     # Example calls to getIntent function
     intents = [
