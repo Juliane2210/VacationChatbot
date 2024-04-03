@@ -54,7 +54,7 @@ __DEPENDENCIES__
 
 __STEPS TO RUN CHATBOT__
 
-{Steps 4-6 aren't necessary if you want to use the pre-saved models}
+
 
 1. Download the repository to local system.
 2. Install all the dependencies as given above.
